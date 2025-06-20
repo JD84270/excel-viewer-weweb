@@ -5,6 +5,11 @@ export default {
       required: true,
     },
   },
+  data() {
+    return {
+      htmlTable: '',
+    };
+  },
   async mounted() {
     if (!window.XLSX) {
       const script = document.createElement('script');
@@ -13,13 +18,24 @@ export default {
       await new Promise(resolve => (script.onload = resolve));
     }
 
-    const res = await fetch(this.fileUrl);
-    const arrayBuffer = await res.arrayBuffer();
-    const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-    const sheetName = workbook.SheetNames[0];
-    const sheet = workbook.Sheets[sheetName];
-    const html = XLSX.utils.sheet_to_html(sheet);
-    this.$el.innerHTML = html;
+    try {
+      const res = await fetch(this.fileUrl);
+      const arrayBuffer = await res.arrayBuffer();
+      const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+      const sheetName = workbook.SheetNames[0];
+      const sheet = workbook.Sheets[sheetName];
+      this.htmlTable = XLSX.utils.sheet_to_html(sheet);
+    } catch (error) {
+      this.htmlTable = `<p>Erreur lors du chargement du fichier Excel.</p>`;
+    }
+  },
+  render(h) {
+    return h('div', {
+      domProps: {
+        innerHTML: this.htmlTable,
+      },
+    });
   },
 };
+
 
