@@ -1,5 +1,3 @@
-import * as XLSX from 'xlsx';
-
 export default {
   props: {
     fileUrl: {
@@ -8,6 +6,13 @@ export default {
     },
   },
   async mounted() {
+    if (!window.XLSX) {
+      const script = document.createElement('script');
+      script.src = 'https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js';
+      document.head.appendChild(script);
+      await new Promise(resolve => (script.onload = resolve));
+    }
+
     const res = await fetch(this.fileUrl);
     const arrayBuffer = await res.arrayBuffer();
     const workbook = XLSX.read(arrayBuffer, { type: 'array' });
@@ -17,3 +22,4 @@ export default {
     this.$el.innerHTML = html;
   },
 };
+
